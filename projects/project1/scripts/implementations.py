@@ -10,6 +10,14 @@ def compute_loss(y, tx, w):
     return (1/n) * (np.dot(np.transpose(e),e))
 
 
+"""Calculates the log loss for logistic regression"""
+def compute_log_loss(y, tx, w):
+    """compute the cost by negative log likelihood."""
+    pred = sigmoid(tx.dot(w))
+    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
+    return np.squeeze(- loss)
+
+
 """Computes the gradient"""
 def compute_gradient(y, tx, w):
     n = y.shape[0]
@@ -107,49 +115,43 @@ def ridge_regression(y, tx, lambda_):
     return (w, loss)
 
 
-def learning_by_gradient_descent(y, tx, w, gamma):
-    """
-    Do one step of gradient descen using logistic regression.
-    Return the loss and the updated w.
-    """
-    loss = compute_loss(y, tx, w)
-    grad = compute_log_gradient(y, tx, w)
-    w -= gamma * grad
-    return loss, w
+"""Computes the prototypes using logistic regression with gradient descent"""
+def logistic_reg_GD(y, tx, initial_w, max_iters, gamma):
+
+    w = initial_w
+    
+    for _ in range(max_iters):
+        w = w - gamma * compute_log_gradient(y, tx, w)   
+
+    loss = compute_log_loss(y, tx, w)
+
+    return (w, loss)
 
 
-def logistic_regression(y, tx, w):
-    """return the loss, gradient, and hessian."""
-    loss = compute_loss(y, tx, w)
-    gradient = compute_log_gradient(y, tx, w)
-    hessian = compute_hessian(y, tx, w)
-    return loss, gradient, hessian
+"""Computes the prototypes using penalized logistic regression with gradient descent"""
+def penalized_logistic_reg_GD(y, tx, initial_w, max_iters, gamma, lambda_):
 
+    w = initial_w
+    
+    for _ in range(max_iters):
+        gradient = compute_log_gradient(y, tx, w) + 2 * lambda_ * w
+        w = w - gamma * gradient 
 
-def learning_by_newton_method(y, tx, w):
-    """
-    Do one step on Newton's method.
-    return the loss and updated w.
-    """
-    loss, gradient, hessian = logistic_regression(y, tx, w)
-    w -= np.linalg.solve(hessian, gradient)
-    return loss, w
-
-
-def penalized_logistic_regression(y, tx, w, lambda_):
-    """return the loss and gradient."""
-    num_samples = y.shape[0]
     loss = compute_loss(y, tx, w) + lambda_ * np.squeeze(w.T.dot(w))
-    gradient = compute_log_gradient(y, tx, w) + 2 * lambda_ * w
-    return loss, gradient
+
+    return (w, loss)
 
 
+"""Computes the prototypes using logistic regression with newton method"""
+def logistic_reg_newton(y, tx, initial_w, max_iters):
 
-def learning_by_penalized_gradient(y, tx, w, gamma, lambda_):
-    """
-    Do one step of gradient descent, using the penalized logistic regression.
-    Return the loss and updated w.
-    """
-    loss, gradient = penalized_logistic_regression(y, tx, w, lambda_)
-    w -= gamma * gradient
-    return loss, w
+    w = initial_w
+    
+    for _ in range(max_iters):
+        gradient = compute_log_gradient(y, tx, w)
+        hessian = compute_hessian(y, tx, w)
+        w = w - np.linalg.solve(hessian, gradient)
+        
+    loss = compute_log_loss(y, tx, w)
+    
+    return (w, loss)
