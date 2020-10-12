@@ -9,15 +9,16 @@ def compute_loss(y, tx, w):
     n = y.shape[0]
     return (1/n) * (np.dot(np.transpose(e),e))
 
+
 """Computes the gradient"""
 def compute_gradient(y, tx, w):
     n = y.shape[0]
     e = y - np.dot(tx,w)
     return (-1/n) * np.dot(np.transpose(tx),e)
 
+
 """Computes the gradient of a logistic function"""
 def compute_log_gradient(y, tx, w):
-    """compute the gradient of loss."""
     pred = sigmoid(tx.dot(w))
     grad = tx.T.dot(pred - y)
     return grad
@@ -68,6 +69,7 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     
     return (w, loss)
 
+
 """Computes the prototypes using least-squares with Stochastic Gradient Descent"""
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     w = initial_w
@@ -79,14 +81,15 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     
     return (w, loss)
 
+
 """Directly computes optimal prototypes using the normal equations of least-squares"""
 def least_squares(y, tx):
-    tx_t = np.transpose(tx)
-    gram = np.dot(tx_t,tx)
-    w = np.dot( np.dot( np.linalg.inv(gram), tx_t ), y)
+    tx_t = tx.T
+    a = tx_t.dot(tx)
+    b = tx_t.dot(y)
     
+    w = np.linalg.solve(a,b)
     loss = compute_loss(y, tx, w)
-    
     return (w, loss)
 
 
@@ -94,13 +97,14 @@ def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""
     N, D = tx.shape
     lambdap = 2 * N * lambda_
+    tx_t = tx.T
+
+    a = tx_t.dot(tx) + lambdap * np.eye(D)
+    b = tx_t.dot(y)
     
-    a = tx.T.dot(tx) + lambdap * np.eye(D)
-    b = y.dot(tx)
-    
-    w_star = np.linalg.solve(a,b)
-    loss = compute_loss(y, tx, w_star)
-    return (w_star, loss)
+    w = np.linalg.solve(a,b)
+    loss = compute_loss(y, tx, w)
+    return (w, loss)
 
 
 def learning_by_gradient_descent(y, tx, w, gamma):
@@ -120,7 +124,7 @@ def logistic_regression(y, tx, w):
     gradient = compute_log_gradient(y, tx, w)
     hessian = compute_hessian(y, tx, w)
     return loss, gradient, hessian
-txttxttxttxttxttxt
+
 
 def learning_by_newton_method(y, tx, w):
     """
