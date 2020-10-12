@@ -106,3 +106,6 @@ ENV/
 *.fdb_latexmk
 *.synctex.gz
 *.tex
+
+# Unpacked data
+/projects/project1/data/*.csv
