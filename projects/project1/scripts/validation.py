@@ -5,9 +5,7 @@ def build_k_indices(y, k_fold):
     num_row = y.shape[0]
     interval = int(num_row / k_fold)
     indices = np.random.permutation(num_row)
-    start = k * interval
-    end = (k + 1) * interval
-    return [indices[start, end] for k in range(k_fold)]
+    return [indices[k * interval: (k + 1) * interval] for k in range(k_fold)]
 
         
 def cross_validation_step(y, tx, k_indices, k, train_function):
