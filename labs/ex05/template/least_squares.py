@@ -6,12 +6,11 @@ Least Square
 
 import numpy as np
 
-
 def least_squares(y, tx):
     """calculate the least squares."""
-    # ***************************************************
-    # INSERT YOUR CODE HERE
-    # least squares: TODO
-    # returns mse, and optimal weights
-    # ***************************************************
-    raise NotImplementedError
+    tx_t = tx.T
+    a = tx_t.dot(tx)
+    b = tx_t.dot(y)
+    
+    return np.linalg.solve(a,b)
+
