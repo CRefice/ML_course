@@ -10,12 +10,18 @@ def compute_loss(y, tx, w):
     return (1/n) * (np.dot(np.transpose(e),e))
 
 
+def sigmoid(t):
+    """apply the sigmoid function on t."""
+    exp = np.exp(t)
+    return exp / (1 + exp)
+
+
 """Calculates the log loss for logistic regression"""
 def compute_log_loss(y, tx, w):
     """compute the cost by negative log likelihood."""
-    pred = sigmoid(tx.dot(w))
-    loss = y.T.dot(np.log(pred)) + (1 - y).T.dot(np.log(1 - pred))
-    return np.squeeze(- loss)
+    a = np.sum(np.log(1 + np.exp(tx @ w)))
+    b = y.T @ (tx @ w)
+    return np.squeeze(a - b)
 
 
 """Computes the gradient"""
