@@ -40,5 +40,5 @@ def optimize_hyperparameter(y, tx, hyperparams, k_indices, train_function):
         for param in hyperparams
     ])
     best = np.argmax(results)
-    print(f"Best parameter: {hyperparams[best]} (accuracy: {results[best]})")
+#     print(f"Best parameter: {hyperparams[best]} (accuracy: {results[best]})")
     return best, results
