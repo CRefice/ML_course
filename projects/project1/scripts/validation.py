@@ -27,11 +27,11 @@ def cross_validation_step(y, tx, k_indices, k, train_function):
 
 
 def cross_validation(y, tx, k_indices, train_function):
-    losses = np.array([
+    accs = np.array([
         cross_validation_step(y, tx, k_indices, k, train_function)
         for k in range(len(k_indices))
     ])
-    return np.mean(losses)
+    return np.mean(accs)
 
 
 def optimize_hyperparameter(y, tx, hyperparams, k_indices, train_function):
