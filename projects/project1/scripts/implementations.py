@@ -27,8 +27,9 @@ def compute_log_loss(y, tx, w):
 """Computes the gradient"""
 def compute_gradient(y, tx, w):
     n = y.shape[0]
-    e = y - np.dot(tx,w)
-    return (-1/n) * np.dot(np.transpose(tx),e)
+    e = y - (tx @ w)
+    grad = (-1/n) * (tx.T @ e)
+    return grad
 
 
 """Computes the gradient of a logistic function"""
