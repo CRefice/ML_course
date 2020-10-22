@@ -9,8 +9,10 @@ def build_k_indices(y, k_fold):
 
 
 def prediction_accuracy(y, tx, w):
-    prediction = np.round(np.squeeze(tx @ w))
-    correct = prediction == y
+    pred = np.squeeze(tx @ w)
+    pred[pred >= 0] = 1
+    pred[pred < 0] = -1
+    correct = pred == y
     return np.count_nonzero(correct) / len(y)
 
         
