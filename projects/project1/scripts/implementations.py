@@ -1,61 +1,63 @@
 import numpy as np
 
-#--------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------
 # Helper functions
+# --------------------------------------------------------------------------------------
 
-"""Calculates the loss via MSE"""
-def compute_loss(y, tx, w):
-    e = y - np.dot(tx,w)
-    n = y.shape[0]
-    return (1/n) * (np.dot(np.transpose(e),e))
+
+def calculate_loss(y, tx, w):
+    """calculate loss via mean squared error"""
+    n = len(y)
+    e = y - tx @ w
+    return (1 / n) * (e.T @ e)
 
 
 def sigmoid(t):
-    """apply the sigmoid function on t."""
+    """
+    calculate the sigmoid function with parameter t,
+    which can be an array or a scalar.
+    """
     exp = np.exp(t)
     return exp / (1 + exp)
 
 
-"""Calculates the log loss for logistic regression"""
-def compute_log_loss(y, tx, w):
-    """compute the cost by negative log likelihood."""
+def calculate_log_loss(y, tx, w):
+    """calculate log loss function via negative log likelihood."""
     a = np.sum(np.log(1 + np.exp(tx @ w)))
     b = y.T @ (tx @ w)
     return np.squeeze(a - b)
 
 
-"""Computes the gradient"""
-def compute_gradient(y, tx, w):
+def calculate_gradient(y, tx, w):
+    """calculate the gradient of the mean squared error loss function"""
     n = y.shape[0]
     e = y - (tx @ w)
-    grad = (-1/n) * (tx.T @ e)
-    return grad
+    return (-1 / n) * (tx.T @ e)
 
 
-"""Computes the gradient of a logistic function"""
-def compute_log_gradient(y, tx, w):
-    pred = sigmoid(tx.dot(w))
-    grad = tx.T.dot(pred - y)
-    return grad
+def calculate_log_gradient(y, tx, w):
+    """calculate the gradient of the logistic loss function"""
+    sigma = sigmoid(tx @ w)
+    return tx.T @ (sigma - y)
 
 
-"""Computes the hessian of the loss function."""
-def compute_hessian(y, tx, w):
-    pred = sigmoid(tx.dot(w))
-    pred = np.diag(pred.T[0])
-    r = np.multiply(pred, (1-pred))
-    return tx.T.dot(r).dot(tx)
+def calculate_hessian(y, tx, w):
+    """calculate the hessian of the logistic loss function."""
+    sigma = sigmoid(tx @ w)
+    s_rows = np.squeeze(sigma * (1 - sigma))
+    s = np.diag(s_rows)
+    return tx.T @ s @ tx
 
 
-"""
+def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
+    """
     Generate a minibatch iterator for a dataset.
     Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
     Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
     Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
     Example of use :
     for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
-"""
-def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
+    """
     data_size = len(y)
 
     if shuffle:
@@ -71,94 +73,91 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
         if start_index != end_index:
             yield shuffled_y[start_index:end_index], shuffled_tx[start_index:end_index]
 
-#--------------------------------------------------------------------------------------
-            
-"""Computes the prototypes using least-squares with Gradient Descent"""
+
+# --------------------------------------------------------------------------------------
+# Learning functions
+# --------------------------------------------------------------------------------------
+
+
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
+    """calculate the weights using full gradient descent with least squares"""
     w = initial_w
-    
+
     for _ in range(max_iters):
-        w = w - gamma * compute_gradient(y, tx, w)
-        
-    loss = compute_loss(y, tx, w)
-    
+        w = w - gamma * calculate_gradient(y, tx, w)
+
+    loss = calculate_loss(y, tx, w)
     return (w, loss)
 
 
-"""Computes the prototypes using least-squares with Stochastic Gradient Descent"""
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
+    """calculate the weights using stochastic gradient descent with least squares"""
+
     w = initial_w
-    
+
     for mini_y, mini_tx in batch_iter(y, tx, 1, max_iters):
-        w = w - gamma * compute_gradient(mini_y, mini_tx, w)
-    
-    loss = compute_loss(y, tx, w)
-    
+        w = w - gamma * calculate_gradient(mini_y, mini_tx, w)
+
+    loss = calculate_loss(y, tx, w)
     return (w, loss)
 
 
-"""Directly computes optimal prototypes using the normal equations of least-squares"""
 def least_squares(y, tx):
+    """directly calculate optimal weights using the normal equations of least squares"""
     tx_t = tx.T
-    a = tx_t.dot(tx)
-    b = tx_t.dot(y)
-    
-    w = np.linalg.solve(a,b)
-    loss = compute_loss(y, tx, w)
+    a = tx_t @ tx
+    b = tx_t @ y
+
+    w = np.linalg.solve(a, b)
+    loss = calculate_loss(y, tx, w)
     return (w, loss)
 
 
 def ridge_regression(y, tx, lambda_):
-    """implement ridge regression."""
-    N, D = tx.shape
-    lambdap = 2 * N * lambda_
+    """directly calculate weights using ridge regression"""
+    n, d = tx.shape
+    lambdap = 2 * n * lambda_
     tx_t = tx.T
 
-    a = tx_t.dot(tx) + lambdap * np.eye(D)
-    b = tx_t.dot(y)
-    
-    w = np.linalg.solve(a,b)
-    loss = compute_loss(y, tx, w)
+    a = tx_t @ tx + lambdap * np.eye(d)
+    b = tx_t @ y
+
+    w = np.linalg.solve(a, b)
+    loss = calculate_loss(y, tx, w)
     return (w, loss)
 
 
-"""Computes the prototypes using logistic regression with gradient descent"""
 def logistic_reg_GD(y, tx, initial_w, max_iters, gamma):
-
+    """calculate the weights using full gradient descent with logistic regression"""
     w = initial_w
-    
+
     for _ in range(max_iters):
-        w = w - gamma * compute_log_gradient(y, tx, w)   
+        w = w - gamma * calculate_log_gradient(y, tx, w)
 
-    loss = compute_log_loss(y, tx, w)
-
+    loss = calculate_log_loss(y, tx, w)
     return (w, loss)
 
 
-"""Computes the prototypes using penalized logistic regression with gradient descent"""
 def penalized_logistic_reg_GD(y, tx, initial_w, max_iters, gamma, lambda_):
-
+    """calculate the weights using full gradient descent with penalized logistic regression"""
     w = initial_w
-    
+
     for _ in range(max_iters):
-        gradient = compute_log_gradient(y, tx, w) + 2 * lambda_ * w
-        w = w - gamma * gradient 
+        gradient = calculate_log_gradient(y, tx, w) + 2 * lambda_ * w
+        w = w - gamma * gradient
 
-    loss = compute_loss(y, tx, w) + lambda_ * np.squeeze(w.T.dot(w))
-
+    loss = calculate_log_loss(y, tx, w) + lambda_ * np.squeeze(w.T @ w)
     return (w, loss)
 
 
-"""Computes the prototypes using logistic regression with newton method"""
 def logistic_reg_newton(y, tx, initial_w, max_iters):
-
+    """calculate the weights using logistic regression with newton's method"""
     w = initial_w
-    
+
     for _ in range(max_iters):
-        gradient = compute_log_gradient(y, tx, w)
-        hessian = compute_hessian(y, tx, w)
+        gradient = calculate_log_gradient(y, tx, w)
+        hessian = calculate_hessian(y, tx, w)
         w = w - np.linalg.solve(hessian, gradient)
-        
-    loss = compute_log_loss(y, tx, w)
-    
+
+    loss = calculate_log_loss(y, tx, w)
     return (w, loss)
