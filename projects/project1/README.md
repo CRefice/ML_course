@@ -26,11 +26,11 @@ More information can be found in the comments of run.py, but the outline of the 
 4. Train each group as a separate model using ridge regression.
 5. Read the test data.
 6. Partition the test data analogously to step 2.
-7. Transform the test data analogously to point 3, using the same mean and standard deviation as computed from the training data.
+7. Transform the test data analogously to point 3, using the same mean and standard deviation as computed from the training data to ensure equal transformations.
 8. Apply the weights obtained in step 4 to the data obtained in step 7.
 9. Clamp the obtained prediction to the label set {-1, 1}.
 10. Save the predictions to file.
 
 # Validation
 As mentioned in the report, we performed model selection through nested cross-validation.
-Even though we didn't end up using logistic regression in our final model, we had to compare it to other methods to come to that conclusion. Since the logistic regression method implemented in the labs only works with labels in the set {0, 1}, we had to transform the training labels from the set {-1, 1} to match the expected form, using the formula `transformed = (original + 1) / 2`. Luckily, other classification methods could use any feature set, so we only had to transform the labels once.
+Even though we did not end up using logistic regression in our final model, we had to compare it to other methods to come to that conclusion. Since the logistic regression method implemented in the labs only works with labels in the set {0, 1}, we had to transform the training labels from the set {-1, 1} to match the expected form, using the formula `transformed = (original + 1) / 2`. Luckily, other classification methods could use any feature set, so we only had to transform the labels once.

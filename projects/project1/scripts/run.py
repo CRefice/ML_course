@@ -10,6 +10,7 @@ def feature_expansion(tx, degree=10):
     Returns the matrix tx concatenated with `degree` powers of itself.
     """
     powers = [np.power(tx, i) for i in range(1, degree + 1)]
+    
     return np.concatenate(powers, axis=1)
 
 
@@ -56,6 +57,7 @@ feature_names = [
     "PRI_jet_all_pt",
 ]
 
+""" The variable used to split the data into subgroups """
 categorical_variable = feature_names.index("PRI_jet_num")
 
 """
@@ -122,7 +124,9 @@ def group_by_jet_num(y, tx):
         np.append(groups[2][0], groups[3][0], axis=0),
         np.append(groups[2][1], groups[3][1], axis=0),
     )
+    # Remove the group that has just been appended to group 2
     groups.pop(3)
+    
     return groups
 
 
@@ -141,10 +145,12 @@ def train_model(y, tx):
     data as to the training set.
     """
     mean, std = np.mean(tx, axis=0), np.std(tx, axis=0)
-    tx = feature_expansion(normalize(tx, mean, std), 10)
+    z_norm_tx = normalize(tx, mean, std)
+    expanded_tx = feature_expansion(z_norm_tx, 10)
 
     lambda_ = 1e-8
-    weights, _ = ridge_regression(y, tx, lambda_)
+    weights, _ = ridge_regression(y, expanded_tx, lambda_)
+    
     return (weights, mean, std)
 
 
@@ -165,6 +171,7 @@ def predict_labels_grouped(group_models, ids, data):
     # of the ids corresponding to the predictions.
     y_pred = np.array([])
     ids_pred = np.array([])
+    
     for (ids, tx), (w, mean, std) in zip(data_groups, group_models):
         tx = feature_expansion(normalize(tx, mean, std))
         y_pred = np.append(y_pred, tx @ w)
@@ -176,10 +183,11 @@ def predict_labels_grouped(group_models, ids, data):
     # Clamp predictions to expected range (-1, 1)
     y_pred[y_pred > 0] = 1
     y_pred[y_pred <= 0] = -1
+    
     return y_pred
 
 
-if len(sys.argv) < 4:
+if len(sys.argv) != 4:
     print(f"Usage:\n\tpython {sys.argv[0]} TRAIN_FILE TEST_FILE OUTPUT_FILE")
     sys.exit(1)
 

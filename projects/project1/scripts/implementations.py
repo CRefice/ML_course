@@ -4,26 +4,27 @@ import numpy as np
 # Helper functions
 # --------------------------------------------------------------------------------------
 
-
+"""
+    Calculate loss via mean squared error.
+"""
 def calculate_loss(y, tx, w):
-    """calculate loss via mean squared error"""
-    n = len(y)
+    n = y.shape[0]
     e = y - tx @ w
     return (1 / n) * (e.T @ e)
 
-
-def sigmoid(t):
-    """
-    calculate the sigmoid function with parameter t,
+"""
+    Calculate the sigmoid function with parameter t,
     which can be an array or a scalar.
-    """
+"""
+def sigmoid(t):
     t = np.clip(t, -500, 500) # to prevent overflows
     exp = np.exp(t)
     return exp / (1 + exp)
 
-
+"""
+    Calculate log loss function via negative log likelihood.
+"""
 def calculate_log_loss(y, tx, w):
-    """calculate log loss function via negative log likelihood."""
     t = tx @ w
     t = np.clip(t, -500, 500) # to prevent overflows
     a = np.sum(np.log(1 + np.exp(t)))
@@ -31,36 +32,39 @@ def calculate_log_loss(y, tx, w):
     return np.squeeze(a - b)
 
 
+"""
+    Calculate the gradient of the mean squared error loss function.
+"""
 def calculate_gradient(y, tx, w):
-    """calculate the gradient of the mean squared error loss function"""
     n = y.shape[0]
     e = y - (tx @ w)
     return (-1 / n) * (tx.T @ e)
 
-
+"""
+    Calculate the gradient of the logistic loss function.
+"""
 def calculate_log_gradient(y, tx, w):
-    """calculate the gradient of the logistic loss function"""
     sigma = sigmoid(tx @ w)
     return tx.T @ (sigma - y)
 
-
+"""
+    Calculate the hessian of the logistic loss function.
+"""
 def calculate_hessian(y, tx, w):
-    """calculate the hessian of the logistic loss function."""
     sigma = sigmoid(tx @ w)
     s_rows = np.squeeze(sigma * (1 - sigma))
     s = np.diag(s_rows)
     return tx.T @ s @ tx
 
-
-def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
-    """
+"""
     Generate a minibatch iterator for a dataset.
     Takes as input two iterables (here the output desired values 'y' and the input data 'tx')
     Outputs an iterator which gives mini-batches of `batch_size` matching elements from `y` and `tx`.
     Data can be randomly shuffled to avoid ordering in the original data messing with the randomness of the minibatches.
     Example of use :
     for minibatch_y, minibatch_tx in batch_iter(y, tx, 32):
-    """
+"""
+def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     data_size = len(y)
 
     if shuffle:
@@ -81,9 +85,10 @@ def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
 # Learning functions
 # --------------------------------------------------------------------------------------
 
-
+"""
+    Calculate the weights using full gradient descent with least squares.
+"""
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
-    """calculate the weights using full gradient descent with least squares"""
     w = initial_w
 
     for _ in range(max_iters):
@@ -92,10 +97,10 @@ def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     loss = calculate_loss(y, tx, w)
     return (w, loss)
 
-
+"""
+    Calculate the weights using stochastic gradient descent with least squares.
+"""
 def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
-    """calculate the weights using stochastic gradient descent with least squares"""
-
     w = initial_w
 
     for mini_y, mini_tx in batch_iter(y, tx, 5, max_iters):
@@ -104,9 +109,10 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     loss = calculate_loss(y, tx, w)
     return (w, loss)
 
-
+"""
+    Directly calculate optimal weights using the normal equations of least squares.
+"""
 def least_squares(y, tx):
-    """directly calculate optimal weights using the normal equations of least squares"""
     tx_t = tx.T
     a = tx_t @ tx
     b = tx_t @ y
@@ -115,9 +121,10 @@ def least_squares(y, tx):
     loss = calculate_loss(y, tx, w)
     return (w, loss)
 
-
+"""
+    Directly calculate weights using ridge regression.
+"""
 def ridge_regression(y, tx, lambda_):
-    """directly calculate weights using ridge regression"""
     n, d = tx.shape
     lambdap = 2 * n * lambda_
     tx_t = tx.T
@@ -129,9 +136,10 @@ def ridge_regression(y, tx, lambda_):
     loss = calculate_loss(y, tx, w)
     return (w, loss)
 
-
+"""
+    Calculate the weights using full gradient descent with logistic regression.
+"""
 def logistic_reg_GD(y, tx, initial_w, max_iters, gamma):
-    """calculate the weights using full gradient descent with logistic regression"""
     w = initial_w
 
     for _ in range(max_iters):
@@ -140,9 +148,10 @@ def logistic_reg_GD(y, tx, initial_w, max_iters, gamma):
     loss = calculate_log_loss(y, tx, w)
     return (w, loss)
 
-
+"""
+    Calculate the weights using full gradient descent with penalized logistic regression.
+"""
 def penalized_logistic_reg_GD(y, tx, initial_w, max_iters, gamma, lambda_):
-    """calculate the weights using full gradient descent with penalized logistic regression"""
     w = initial_w
 
     for _ in range(max_iters):
@@ -152,9 +161,10 @@ def penalized_logistic_reg_GD(y, tx, initial_w, max_iters, gamma, lambda_):
     loss = calculate_log_loss(y, tx, w) + lambda_ * np.squeeze(w.T @ w)
     return (w, loss)
 
-
+"""
+    Calculate the weights using logistic regression with newton's method.
+"""
 def logistic_reg_newton(y, tx, initial_w, max_iters):
-    """calculate the weights using logistic regression with newton's method"""
     w = initial_w
 
     for _ in range(max_iters):
