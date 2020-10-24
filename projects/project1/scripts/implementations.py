@@ -17,13 +17,16 @@ def sigmoid(t):
     calculate the sigmoid function with parameter t,
     which can be an array or a scalar.
     """
+    t = np.clip(t, -500, 500) # to prevent overflows
     exp = np.exp(t)
     return exp / (1 + exp)
 
 
 def calculate_log_loss(y, tx, w):
     """calculate log loss function via negative log likelihood."""
-    a = np.sum(np.log(1 + np.exp(tx @ w)))
+    t = tx @ w
+    t = np.clip(t, -500, 500) # to prevent overflows
+    a = np.sum(np.log(1 + np.exp(t)))
     b = y.T @ (tx @ w)
     return np.squeeze(a - b)
 

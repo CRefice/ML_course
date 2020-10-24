@@ -53,7 +53,6 @@ def cross_validation(y, tx, k_indices, train_function):
 def nested_cross_validation(
     y, tx, k_indices, hyperparams, train_function, num_sub_splits=4
 ):
-    print(hyperparams)
     scores = np.empty(len(k_indices))
     for (k, (test, trainval)) in enumerate(k_fold_iterator(k_indices)):
         inner_folds = build_k_indices(len(trainval), num_sub_splits)
@@ -69,8 +68,6 @@ def nested_cross_validation(
                 for val, train in k_fold_iterator(inner_folds)
             ]
         )
-        print(results)
-        break
         average_by_hyperparam = np.mean(results, axis=0)
         best_idx = np.argmax(average_by_hyperparam)
         best_acc = np.max(average_by_hyperparam)
