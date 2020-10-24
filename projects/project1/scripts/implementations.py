@@ -95,7 +95,7 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
 
     w = initial_w
 
-    for mini_y, mini_tx in batch_iter(y, tx, 1, max_iters):
+    for mini_y, mini_tx in batch_iter(y, tx, 5, max_iters):
         w = w - gamma * calculate_gradient(mini_y, mini_tx, w)
 
     loss = calculate_loss(y, tx, w)
