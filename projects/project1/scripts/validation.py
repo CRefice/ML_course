@@ -20,18 +20,19 @@ def normalize(tx, mean, std):
         
 
 def prediction_accuracy(y, tx, w):
-    pred = np.squeeze(tx @ w)
-    correct = np.round(pred) == y
-    return np.count_nonzero(correct) / len(y)
+    y_pred = tx @ w
+    y_pred[y_pred <= 0.5] = 0
+    y_pred[y_pred > 0.5] = 1
+    return sum(y == y_pred) / len(y)
 
 
 def cross_validation_step(y, tx, test_indices, train_indices, train_function):
     test_tx, test_y = tx[test_indices], y[test_indices]
     train_tx, train_y = tx[train_indices], y[train_indices]
     
-    mean, std = np.mean(train_tx), np.std(train_tx)
-    train_tx = normalize(train_tx, mean, std)
-    test_tx = normalize(test_tx, mean, std)
+#     mean, std = np.mean(train_tx), np.std(train_tx)
+#     train_tx = normalize(train_tx, mean, std)
+#     test_tx = normalize(test_tx, mean, std)
     
     # train model on training data
     w, _ = train_function(train_y, train_tx)
@@ -52,6 +53,7 @@ def cross_validation(y, tx, k_indices, train_function):
 def nested_cross_validation(
     y, tx, k_indices, hyperparams, train_function, num_sub_splits=4
 ):
+    print(hyperparams)
     scores = np.empty(len(k_indices))
     for (k, (test, trainval)) in enumerate(k_fold_iterator(k_indices)):
         inner_folds = build_k_indices(len(trainval), num_sub_splits)
@@ -67,6 +69,8 @@ def nested_cross_validation(
                 for val, train in k_fold_iterator(inner_folds)
             ]
         )
+        print(results)
+        break
         average_by_hyperparam = np.mean(results, axis=0)
         best_idx = np.argmax(average_by_hyperparam)
         best_acc = np.max(average_by_hyperparam)
