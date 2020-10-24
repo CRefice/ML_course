@@ -67,10 +67,11 @@ def nested_cross_validation(
                 for val, train in k_fold_iterator(inner_folds)
             ]
         )
-        average_by_hyperparam = np.mean(results, axis=1)
+        average_by_hyperparam = np.mean(results, axis=0)
         best_idx = np.argmax(average_by_hyperparam)
+        best_acc = np.max(average_by_hyperparam)
         best_hyperparam = hyperparams[best_idx]
-        print(f"Best hyperparam for iteration {k}: {best_hyperparam}")
+        print(f"Best hyperparam for iteration {k}: {best_hyperparam}, acc: {best_acc}")
         scores[k] = cross_validation_step(
             y, tx, test, trainval, lambda y, tx: train_function(y, tx, best_hyperparam)
         )
