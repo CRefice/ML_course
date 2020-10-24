@@ -26,13 +26,25 @@ def prediction_accuracy(y, tx, w):
     return sum(y == y_pred) / len(y)
 
 
+def polynomial_expansion(tx, degree):
+    powers = [np.power(tx, i) for i in range(2, degree)]
+    return [tx] + powers
+
+
+def feature_expansion(tx):
+    return np.concatenate(polynomial_expansion(tx, 11),axis=1)
+
+
 def cross_validation_step(y, tx, test_indices, train_indices, train_function):
     test_tx, test_y = tx[test_indices], y[test_indices]
     train_tx, train_y = tx[train_indices], y[train_indices]
     
-#     mean, std = np.mean(train_tx), np.std(train_tx)
-#     train_tx = normalize(train_tx, mean, std)
-#     test_tx = normalize(test_tx, mean, std)
+    mean, std = np.mean(train_tx, axis=0), np.std(train_tx, axis=0)
+    train_tx = normalize(train_tx, mean, std)
+    test_tx = normalize(test_tx, mean, std)
+    
+    train_tx = feature_expansion(train_tx)
+    test_tx = feature_expansion(test_tx)
     
     # train model on training data
     w, _ = train_function(train_y, train_tx)
