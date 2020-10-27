@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+"""Exercise 3.
+
+Least Square
+"""
+
+import numpy as np
+
+<<<<<<< HEAD
+def least_squares(y, tx):
+    """calculate the least squares."""
+    tx_t = tx.T
+    a = tx_t.dot(tx)
+    b = tx_t.dot(y)
+    
+    return np.linalg.solve(a,b)
+
+=======
+
+def least_squares(y, tx):
+    """calculate the least squares."""
+    # ***************************************************
+    # INSERT YOUR CODE HERE
+    # least squares: TODO
+    # returns mse, and optimal weights
+    # ***************************************************
+    raise NotImplementedError
+>>>>>>> 30b7a2009e36df15ad68c8d6ef3017e8684405e5

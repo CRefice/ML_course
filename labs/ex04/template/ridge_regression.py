@@ -7,6 +7,7 @@ Ridge Regression
 import numpy as np
 from costs import compute_mse
 
+
 def ridge_regression(y, tx, lambda_):
     """implement ridge regression."""
     N, D = tx.shape
